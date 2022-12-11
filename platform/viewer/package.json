@@ -6,7 +6,7 @@
   "author": "OHIF Contributors",
   "license": "MIT",
   "repository": "OHIF/Viewers",
-  "main": "dist/index.umd.js",
+  "main": "dist/electron.js",
   "module": "src/index.js",
   "publishConfig": {
     "access": "public"
@@ -17,6 +17,18 @@
     "yarn": ">=1.16.0"
   },
   "proxy": "http://localhost:8042",
+  "build": {
+    "appId": "com.higia.visualizador",
+    "target": "portable",
+    "productName": "Abrir Visualizador",
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "public"
+    }
+  },
   "scripts": {
     "build:viewer": "cross-env NODE_ENV=production yarn run build",
     "build:dev": "cross-env NODE_ENV=development yarn run build",
@@ -25,7 +37,7 @@
     "build:viewer:qa": "cross-env NODE_ENV=production APP_CONFIG=config/google.js yarn run build",
     "build:viewer:demo": "cross-env NODE_ENV=production APP_CONFIG=config/demo.js HTML_TEMPLATE=rollbar.html QUICK_BUILD=false yarn run build",
     "build": "node --max_old_space_size=4096 ./../../node_modules/webpack/bin/webpack.js --progress --config .webpack/webpack.pwa.js",
-    "dev": "cross-env NODE_ENV=development webpack serve --config .webpack/webpack.pwa.js",
+    "dev": "cross-env NODE_ENV=development PUBLIC_URL=/ webpack serve --config .webpack/webpack.pwa.js",
     "dev:orthanc": "cross-env NODE_ENV=development PROXY_TARGET=/dicom-web PROXY_DOMAIN=http://localhost:8042 APP_CONFIG=config/docker_nginx-orthanc.js webpack serve --config .webpack/webpack.pwa.js",
     "dev:dcm4chee": "cross-env NODE_ENV=development APP_CONFIG=config/local_dcm4chee.js webpack serve --config .webpack/webpack.pwa.js",
     "dev:static": "cross-env NODE_ENV=development APP_CONFIG=config/local_static.js webpack serve --config .webpack/webpack.pwa.js",
@@ -39,7 +51,9 @@
     "test:e2e:serve": "cross-env APP_CONFIG=config/e2e.js yarn start",
     "test:unit": "jest --watchAll",
     "test:unit:ci": "jest --ci --runInBand --collectCoverage",
-    "ci:generateSuccessVersion": "node -p -e \"require('./package.json').version\" > success_version.txt"
+    "ci:generateSuccessVersion": "node -p -e \"require('./package.json').version\" > success_version.txt",
+    "electron:start": "cross-env PUBLIC_URL=./ yarn run build:viewer && electron .",
+    "electron:package:win": "cross-env PUBLIC_URL=./ yarn run build:viewer && electron-builder -w -c.extraMetadata.main=dist/electron.js"
   },
   "files": [
     "dist",
@@ -49,8 +63,8 @@
     "@babel/runtime": "7.16.3",
     "@ohif/core": "^3.0.0",
     "@ohif/extension-cornerstone": "^3.0.0",
-    "@ohif/extension-cornerstone-dicom-sr": "^3.0.0",
     "@ohif/extension-cornerstone-dicom-seg": "^3.0.0",
+    "@ohif/extension-cornerstone-dicom-sr": "^3.0.0",
     "@ohif/extension-default": "^3.0.0",
     "@ohif/extension-dicom-pdf": "^3.0.1",
     "@ohif/extension-dicom-video": "^3.0.1",
@@ -89,9 +103,12 @@
     "@percy/cypress": "^3.1.1",
     "cypress": "^9.5.4",
     "cypress-file-upload": "^3.5.3",
+    "electron": "22.0.0",
+    "electron-builder": "^23.6.0",
+    "electron-is-dev": "^2.0.0",
+    "glob": "^8.0.3",
     "identity-obj-proxy": "3.0.x",
     "lodash": "4.17.15",
-    "glob": "^8.0.3",
     "tailwindcss": "3.2.4",
     "terser-webpack-plugin": "^5.1.1",
     "webpack": "^5.50.0",

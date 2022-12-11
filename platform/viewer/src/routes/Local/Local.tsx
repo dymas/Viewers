@@ -71,6 +71,7 @@ function Local() {
   // Set body style
   useEffect(() => {
     document.body.classList.add('bg-black');
+    document.getElementById('files').innerText = `${files}`;
     return () => {
       document.body.classList.remove('bg-black');
     };
@@ -87,6 +88,7 @@ function Local() {
     >
       {({ getRootProps }) => (
         <div {...getRootProps()} style={{ width: '100%', height: '100%' }}>
+          <p id="files"></p>
           <div className="h-screen w-screen flex justify-center items-center ">
             <div className="py-8 px-8 mx-auto bg-secondary-dark drop-shadow-md space-y-2 rounded-lg">
               <img
