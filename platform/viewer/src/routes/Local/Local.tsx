@@ -71,7 +71,7 @@ function Local() {
   // Set body style
   useEffect(() => {
     document.body.classList.add('bg-black');
-    onDrop(files);
+    files.length === 0 ? console.log('No files') : onDrop(files);
     return () => {
       document.body.classList.remove('bg-black');
     };
