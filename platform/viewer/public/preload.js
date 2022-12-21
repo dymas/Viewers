@@ -6,7 +6,7 @@ const { contextBridge } = require('electron');
 
 function LocalFileData(pathReceived) {
   this.arrayBuffer = (() => {
-    var buffer = fs.readFileSync('./resources/' + pathReceived);
+    var buffer = fs.readFileSync(pathReceived);
     var arrayBuffer = buffer.slice(
       buffer.byteOffset,
       buffer.byteOffset + buffer.byteLength
@@ -23,18 +23,39 @@ function constructFileFromLocalFileData(localFileData) {
   return new File(localFileData.arrayBuffer, localFileData.name, { type: localFileData.type });
 };
 
-let files = [];
+function DICOMToFileObject(dir_path) {
+  let DICOMFileObjectArray = [];
 
-fs.readdirSync('./resources').forEach(file => {
-  console.log(file);
-  console.log(path.extname(file));
-  if (path.extname(file) === '.dcm') {
-    const newfile = new LocalFileData(file);
+  fs.readdirSync(dir_path).forEach(file => {
+    const newLocalFileData = new LocalFileData(dir_path + '/' + file);
+    const newFileObject = constructFileFromLocalFileData(newLocalFileData);
 
-    const fileobject = constructFileFromLocalFileData(newfile);
+    DICOMFileObjectArray.push(newFileObject);
+  });
 
-    files.push(fileobject);
+  return DICOMFileObjectArray;
+}
+
+function openDirectoriesToFindDICOMFiles(dir_path) {
+  let currentDirPath = dir_path;
+
+  let keepSearching = true;
+  while (keepSearching) {
+    fs.readdirSync(currentDirPath, { withFileTypes: true }).forEach(file => {
+      if (file.isDirectory()) {
+        currentDirPath += '/' + file.name;
+      }
+
+      if (path.extname(file.name) == '.dcm' || path.extname(file.name) == '.dicom') {
+        keepSearching = false;
+      }
+    });
   }
-});
+
+  return currentDirPath;
+}
+
+const foundPath = openDirectoriesToFindDICOMFiles('./resources');
+const files = DICOMToFileObject(foundPath);
 
 contextBridge.exposeInMainWorld('files', [...files]);
